@@ -9,60 +9,63 @@ import SwiftUI
 
 struct HomeScreen: View {
     
-    @State private var showAddLoanView = false
+    @StateObject private var viewModel = HomeScreenVM()
+    @State private var listTypes: ListTypes = .all
     
     var body: some View {
-        NavigationView {
+//        NavigationView {
             ScrollView {
                 VStack(spacing: 16) {
                     
                     // MARK: - Summary Cards
                     HStack(spacing: 16) {
-                        SummaryCard(title: "Total Borrowed", amount: 12000, color: .red)
-                        SummaryCard(title: "Total Lent", amount: 8000, color: .green)
+                        SummaryCard(title: AppStrings.Labels.totalBorrowed,
+                                    amount: viewModel.totalBorrowed,
+                                    color: .red)
+                        SummaryCard(title: AppStrings.Labels.totalLent,
+                                    amount: viewModel.totalLent,
+                                    color: .green)
                     }
                     .padding(.horizontal)
+                    
+                    Picker(String.empty, selection: $listTypes) {
+                            ForEach(ListTypes.allCases, id: \.self) {
+                                Text($0.displayName)
+                            }
+                     }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
 
-                    // MARK: - Upcoming Payments
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Upcoming Payments")
-                            .font(.headline)
-                            .padding(.horizontal)
-
-                        ForEach(sampleLoans.prefix(3)) { loan in
-                            NavigationLink(destination: AddLoanView()) {
-                                LoanRowView(loan: loan)
-                                            }
+                    let filteredLoans = viewModel.getLoans(loanTypes: listTypes)
+                    if filteredLoans.isEmpty {
+                        EmptyStateView(
+                            message: "No \(listTypes.displayName.lowercased()) loans available.\nTap + to add a new loan.",
+                            systemImage: "creditcard"
+                        )
+                        .padding(.vertical)
+                    } else {
+                        VStack(alignment: .center, spacing: 8) {
+                            ForEach(filteredLoans) { loan in
+                                NavigationLink(destination: AddLoanView()) {
+                                    LoanRowView(loan: loan)
+                                        .frame(maxWidth: .infinity)
+                                }
+                            }
                         }
-                    }
-
-                    // MARK: - All Loans
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("All Loans")
-                            .font(.headline)
-                            .padding(.horizontal)
-
-                        ForEach(sampleLoans) { loan in
-                            LoanRowView(loan: loan)
-                        }
+                        .frame(maxWidth: .infinity)
                     }
                 }
                 .padding(.vertical)
-                .sheet(isPresented: $showAddLoanView) {
-                    AddLoanView()
+                .frame(maxWidth: .infinity)
+            }
+            .navigationTitle(viewModel.screenTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                NavigationLink(destination: AddLoanView()) {
+                    Image(systemName: "plus")
                 }
             }
-            .navigationTitle("Dashboard")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                                   Button(action: {
-                                       showAddLoanView = true
-                                   }) {
-                                       Image(systemName: "plus")
-                                   }
-                               }
-            }
-        }
+//        }
     }
 }
 
@@ -70,16 +73,22 @@ struct HomeScreen: View {
     HomeScreen()
 }
 
-struct Loan: Identifiable {
-    let id = UUID()
-    let title: String
-    let type: String // "Borrowed" or "Lent"
-    let dueDate: String
-    let amount: Double
-}
 
-let sampleLoans = [
-    Loan(title: "Car Loan - Dad", type: "Borrowed", dueDate: "25 May 2025", amount: 5000),
-    Loan(title: "Personal Loan - Ravi", type: "Lent", dueDate: "1 June 2025", amount: 3000),
-    Loan(title: "Home Loan", type: "Borrowed", dueDate: "15 June 2025", amount: 7000)
-]
+//struct InlineNavigationModifier: ViewModifier {
+//    let title: String
+//    let displayBackButton: Bool
+//
+//    func body(content: Content) -> some View {
+//        content
+//            .navigationTitle(title)
+//            .navigationBarTitleDisplayMode(.inline)
+//            .navigationBarBackButtonHidden(!displayBackButton)
+//            .navigationBarBackButtonDisplayMode(.minimal)
+//    }
+//}
+//
+//extension View {
+//    func inlineNavigation(title: String, showBackButton: Bool = true) -> some View {
+//        self.modifier(InlineNavigationModifier(title: title, displayBackButton: showBackButton))
+//    }
+//}

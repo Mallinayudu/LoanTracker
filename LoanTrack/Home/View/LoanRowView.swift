@@ -13,9 +13,9 @@ struct LoanRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
-                Text(loan.title)
+                Text(loan.name)
                     .font(.headline)
-                Text("Due: \(loan.dueDate)")
+                Text("Due: \(loan.dueDate.description)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
             }
@@ -23,14 +23,15 @@ struct LoanRowView: View {
             VStack(alignment: .trailing) {
                 Text("₹\(Int(loan.amount))")
                     .font(.headline)
-                Text(loan.type)
+                Text(loan.type.displayName)
                     .font(.subheadline)
-                    .foregroundColor(loan.type == "Borrowed" ? .red : .green)
+                    .foregroundColor(loan.type == .borrowed ? .red : .green)
             }
         }
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(10)
         .padding(.horizontal)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }

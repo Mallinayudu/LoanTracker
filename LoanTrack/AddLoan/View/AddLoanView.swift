@@ -17,27 +17,27 @@ struct AddLoanView: View {
     @State private var rePaymentType: RePaymentType = .monthly
     @State private var selectedDay: Int = 1
     
-    @State private var personName: String = ""
-    @State private var loanName: String = ""
-    @State private var person: String = ""
-    @State private var amount: String = ""
-    @State private var interest: String = ""
+    @State private var personName: String = String.empty
+    @State private var loanName: String = String.empty
+    @State private var person: String = String.empty
+    @State private var amount: String = String.empty
+    @State private var interest: String = String.empty
     
     @State private var dueDate: Date = Date()
     
     var body: some View {
-        NavigationView {
+//        NavigationView {
             Form {
                 Section {
                 
-                    Picker("Loan", selection: $loan) {
+                    Picker(AppStrings.Labels.loan, selection: $loan) {
                         ForEach(LoanNames.allCases, id: \.self) {
                             Text($0.rawValue.localizedCapitalized)
                         }
                     }
                     .pickerStyle(.menu)
                     
-                    Picker("Type", selection: $loanType) {
+                    Picker(AppStrings.Labels.type, selection: $loanType) {
                         ForEach(LoanTypes.allCases, id: \.self) {
                             Text($0.displayName)
                         }
@@ -49,28 +49,27 @@ struct AddLoanView: View {
                         hideKeyboard()
                     }
                     
-                    
                     HStack {
                         Text("₹")
                         TextField(AppStrings.Placeholders.enterAmount, text: $amount)
                             .keyboardType(.decimalPad)
                     }
                     
-                    Picker("Rate Of Interest Type", selection: $rateOfInterestType) {
+                    Picker(AppStrings.Labels.rateOfInterestType, selection: $rateOfInterestType) {
                         ForEach(RateOfInterestTypes.allCases, id: \.self) {
                             Text($0.rawValue.localizedCapitalized)
                         }
                     }
                     .pickerStyle(.menu)
                     
-                    TextField("Interest", text: $interest)
+                    TextField(AppStrings.Labels.interest, text: $interest)
                             .keyboardType(.decimalPad)
 
-                    DatePicker(loanType == .lent ? "Given Date" : "Taken Date",
+                    DatePicker(loanType == .lent ? AppStrings.Labels.givenDate : AppStrings.Labels.takenDate,
                                selection: $dueDate,
                                displayedComponents: .date)
                    
-                    Picker("Tenure", selection: $loanTenure) {
+                    Picker(AppStrings.Labels.tenure, selection: $loanTenure) {
                         ForEach(LoanTenure.allCases, id: \.self) {
                             Text($0.displayName)
                         }
@@ -79,7 +78,7 @@ struct AddLoanView: View {
                 }
                 
                 Section {
-                    Picker("Re-Payment Type", selection: $rePaymentType) {
+                    Picker(AppStrings.Labels.rePaymentType, selection: $rePaymentType) {
                         ForEach(RePaymentType.allCases, id: \.self) {
                             Text($0.displayName)
                         }
@@ -87,7 +86,7 @@ struct AddLoanView: View {
                     .pickerStyle(.menu)
                     
                     if rePaymentType == .once {
-                        DatePicker("Payment Date",
+                        DatePicker(AppStrings.Labels.paymentDate,
                                    selection: $dueDate,
                                    displayedComponents: .date)
                     } else {
@@ -101,7 +100,7 @@ struct AddLoanView: View {
                     
                     HStack {
                         Text("₹")
-                        TextField("Amount", text: $amount)
+                        TextField(AppStrings.Placeholders.enterAmount, text: $amount)
                             .keyboardType(.decimalPad)
                     }
                 }
@@ -111,7 +110,7 @@ struct AddLoanView: View {
                         // Handle save action here
                         presentationMode.wrappedValue.dismiss()
                     }) {
-                        Text("Add")
+                        Text(AppStrings.Buttons.add)
                             .frame(maxWidth: .infinity, alignment: .center)
                             .font(.headline)
                             .foregroundColor(.white)
@@ -123,7 +122,10 @@ struct AddLoanView: View {
             }.onTapGesture {
                 self.hideKeyboard()
             }
-        }
+            .navigationTitle("Add Loan")
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarBackButtonHidden(false)
+//        }
     }
 }
 

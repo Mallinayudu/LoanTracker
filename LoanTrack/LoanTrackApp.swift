@@ -11,7 +11,9 @@ import SwiftUI
 struct LoanTrackApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeScreen()
+            NavigationStack {
+                HomeScreen()
+            }
         }
     }
 }
