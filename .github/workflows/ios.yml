@@ -14,6 +14,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install || gem install fastlane
+
+      - name: Set up Git credentials for Match
+        run: |
+          git config --global user.name "Mallinayudu"
+          git config --global user.email "mallinaidu.kata@gmail.com"
+
+      - name: Run Fastlane Beta Lane
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+        run: fastlane beta
       - name: Set Xcode version
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
       - name: Set Default Scheme
