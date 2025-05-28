@@ -5,6 +5,11 @@ platform :ios do
   lane :beta do
     build_app(
       scheme: "LoanTrack"  # replace with your scheme
+      xcargs: "-allowProvisioningUpdates",
+      export_method: "app-store",
+      export_options: {
+        signingStyle: "automatic",
+      }
     )
    upload_to_testflight(
   api_key: get_api_key
