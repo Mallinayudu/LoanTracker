@@ -11,52 +11,60 @@ struct HomeScreen: View {
     
     @StateObject private var viewModel = HomeScreenVM()
     @State private var listTypes: ListTypes = .all
+    @State private var selectedLoan: Loan?
     
     var body: some View {
-//        NavigationView {
-            ScrollView {
-                VStack(spacing: 16) {
-                    
-                    // MARK: - Summary Cards
-                    HStack(spacing: 16) {
-                        SummaryCard(title: AppStrings.Labels.totalBorrowed,
-                                    amount: viewModel.totalBorrowed,
-                                    color: .red)
-                        SummaryCard(title: AppStrings.Labels.totalLent,
-                                    amount: viewModel.totalLent,
-                                    color: .green)
-                    }
-                    .padding(.horizontal)
-                    
-                    Picker(String.empty, selection: $listTypes) {
-                            ForEach(ListTypes.allCases, id: \.self) {
-                                Text($0.displayName)
-                            }
-                     }
-                    .pickerStyle(SegmentedPickerStyle())
-                    .padding(.horizontal)
-
-                    let filteredLoans = viewModel.getLoans(loanTypes: listTypes)
-                    if filteredLoans.isEmpty {
-                        EmptyStateView(
-                            message: "No \(listTypes.displayName.lowercased()) loans available.\nTap + to add a new loan.",
-                            systemImage: "creditcard"
-                        )
-                        .padding(.vertical)
-                    } else {
-                        VStack(alignment: .center, spacing: 8) {
-                            ForEach(filteredLoans) { loan in
-                                NavigationLink(destination: AddLoanView()) {
-                                    LoanRowView(loan: loan)
-                                        .frame(maxWidth: .infinity)
-                                }
-                            }
+            VStack(spacing: 16) {
+                // MARK: - Summary Cards
+                HStack(spacing: 16) {
+                    SummaryCard(title: AppStrings.Labels.totalBorrowed,
+                                amount: viewModel.totalBorrowed,
+                                color: .red)
+                    SummaryCard(title: AppStrings.Labels.totalLent,
+                                amount: viewModel.totalLent,
+                                color: .green)
+                }
+                .padding(.horizontal)
+                
+                Picker(String.empty, selection: $listTypes) {
+                        ForEach(ListTypes.allCases, id: \.self) {
+                            Text($0.displayName)
                         }
-                        .frame(maxWidth: .infinity)
+                 }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding(.horizontal)
+
+                let filteredLoans = viewModel.getLoans(loanTypes: listTypes)
+                if filteredLoans.isEmpty {
+                    EmptyStateView(
+                        message: "No \(listTypes.displayName.lowercased()) loans available.\nTap + to add a new loan.",
+                        systemImage: "creditcard"
+                    )
+                    .padding(.vertical)
+                } else {
+                    List(filteredLoans) { loan in
+                        Button {
+                            selectedLoan = loan
+                         } label: {
+                             LoanRowView(loan: loan)
+                         }
+                         .listRowSeparator(.hidden)
+                         .listRowBackground(Color.clear)
+                         .buttonStyle(PlainButtonStyle())
+                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    viewModel.deleteLoan(loan: loan)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                          }
+                    }
+                    .listStyle(.inset)
+                    .scrollContentBackground(.hidden)
+                    .navigationDestination(item: $selectedLoan) { loan in
+                        LoanDetailView(loan: loan)
                     }
                 }
-                .padding(.vertical)
-                .frame(maxWidth: .infinity)
             }
             .navigationTitle(viewModel.screenTitle)
             .navigationBarTitleDisplayMode(.inline)
@@ -65,30 +73,12 @@ struct HomeScreen: View {
                     Image(systemName: "plus")
                 }
             }
-//        }
+            .onAppear {
+                viewModel.fetchLoans()
+            }
     }
 }
 
 #Preview {
     HomeScreen()
 }
-
-
-//struct InlineNavigationModifier: ViewModifier {
-//    let title: String
-//    let displayBackButton: Bool
-//
-//    func body(content: Content) -> some View {
-//        content
-//            .navigationTitle(title)
-//            .navigationBarTitleDisplayMode(.inline)
-//            .navigationBarBackButtonHidden(!displayBackButton)
-//            .navigationBarBackButtonDisplayMode(.minimal)
-//    }
-//}
-//
-//extension View {
-//    func inlineNavigation(title: String, showBackButton: Bool = true) -> some View {
-//        self.modifier(InlineNavigationModifier(title: title, displayBackButton: showBackButton))
-//    }
-//}

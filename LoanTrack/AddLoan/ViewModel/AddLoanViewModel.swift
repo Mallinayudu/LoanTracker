@@ -1,11 +1,12 @@
 import Foundation
 import Combine
+import CoreData
 
 @MainActor
 class AddLoanViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var loanName: LoanNames = .personal
-    @Published var loanType: LoanType = .lent
+    @Published var loanType: LoanTypes = .lent
     @Published var borrowerLentName: String = String.empty
     @Published var amount: Double = 0.0
     @Published var rateOfInterestType: RateOfInterestTypes = .rupees
@@ -30,6 +31,7 @@ class AddLoanViewModel: ObservableObject {
     @Published var alertMessage: String = String.empty
     
     private var cancellables = Set<AnyCancellable>()
+    private let coreDataManager = CoreDataManager.shared
     
     init() {
         setupValidation()
@@ -50,11 +52,8 @@ class AddLoanViewModel: ObservableObject {
         // Amount Validation
         $amount
             .debounce(for: 0.5, scheduler: DispatchQueue.main)
-            .map { amountStr in
-//                guard let amount = Double(amountStr) else {
-//                    return "Please enter a valid amount"
-//                }
-                if self.amount <= 0 {
+            .map { amount in
+                if amount <= 0 {
                     return "Amount must be greater than 0"
                 }
                 return nil
@@ -64,26 +63,13 @@ class AddLoanViewModel: ObservableObject {
         // Interest Rate Validation
         $interestRate
             .debounce(for: 0.5, scheduler: DispatchQueue.main)
-            .map { rateStr in
-//                guard let rate = Double(rateStr) else {
-//                    return "Please enter a valid interest rate"
-//                }
-                if self.interestRate < 0 {
+            .map { rate in
+                if rate < 0 {
                     return "Interest rate cannot be negative"
                 }
                 return nil
             }
             .assign(to: &$interestRateError)
-        
-        // Date Validation
-//        Publishers.CombineLatest($startDate, $dueDate)
-//            .map { startDate, dueDate in
-//                if dueDate < startDate {
-//                    return "Due date must be after start date"
-//                }
-//                return nil
-//            }
-//            .assign(to: &$dateError)
     }
     
     var isFormValid: Bool {
@@ -98,25 +84,29 @@ class AddLoanViewModel: ObservableObject {
         return true
     }
     
-    func createLoan() async throws -> AddLoanModel {
-//        guard let amountValue = Double(amount),
-//              let interestRateValue = Double(interestRate) else {
-//            throw ValidationError.invalidInput
-//        }
+    func saveLoan() async throws {
+        guard isFormValid else {
+            throw ValidationError.invalidInput
+        }
         
-        return AddLoanModel(loanName: loanName,
-                            loanType: loanType,
-                            borrowerLentName: borrowerLentName,
-                            amount: amount,
-                            rateOfInterestType: rateOfInterestType,
-                            interestRate: interestRate,
-                            startDate: startDate,
-                            createdAt: createdDate,
-                            tenure: tenure,
-                            repaymentType: repaymentType,
-                            repaymentDate: repaymentDate,
-                            instsllAmount: installAmount,
-                            repaymentDay: repaymentDay)
+        let loan = AddLoanModel(
+            loanName: loanName,
+            loanType: loanType,
+            borrowerLentName: borrowerLentName,
+            amount: amount,
+            rateOfInterestType: rateOfInterestType,
+            interestRate: interestRate,
+            startDate: startDate,
+            createdAt: createdDate,
+            tenure: tenure,
+            repaymentType: repaymentType,
+            repaymentDate: repaymentDate,
+            installAmount: installAmount,
+            repaymentDay: repaymentDay
+        )
+        
+        try await coreDataManager.createLoan(from: loan)
+        clearForm()
     }
     
     func clearForm() {
@@ -124,7 +114,9 @@ class AddLoanViewModel: ObservableObject {
         amount = 0.0
         interestRate = 0.0
         startDate = Date()
-//        dueDate = Date().addingTimeInterval(30*24*60*60)
+        repaymentDate = Date().addingTimeInterval(30*24*60*60)
+        installAmount = 0.0
+        repaymentDay = 0
     }
 }
 

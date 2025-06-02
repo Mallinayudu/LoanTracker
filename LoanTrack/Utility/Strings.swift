@@ -45,6 +45,6 @@ enum AppStrings {
     }
     
     enum ScreenTitles {
-        static let dasboard = "Dashboard"
+        static let dasboard = "My Loans"
     }
 }

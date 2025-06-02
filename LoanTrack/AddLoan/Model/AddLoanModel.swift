@@ -23,7 +23,7 @@ enum LoanTypes: String, CaseIterable, Codable {
                 case .borrowedFromBank:
             return AppStrings.Labels.borrowedFromBank
                 case .borrowedFromFriend:
-                    return AppStrings.Labels.borrowedFromBank
+            return AppStrings.Labels.borrowedFromPerson
                 case .lent:
                     return AppStrings.Labels.lent
         }
@@ -108,7 +108,7 @@ enum RePaymentType: String, CaseIterable, Codable {
 struct AddLoanModel: Identifiable, Codable {
     var id: UUID = UUID()
     var loanName: LoanNames?
-    var loanType: LoanType?
+    var loanType: LoanTypes?
     var borrowerLentName: String
     var amount: Double
     var rateOfInterestType: RateOfInterestTypes?
@@ -118,10 +118,10 @@ struct AddLoanModel: Identifiable, Codable {
     var tenure: LoanTenure?
     var repaymentType: RePaymentType?
     var repaymentDate: Date?
-    var instsllAmount: Double?
+    var installAmount: Double?
     var repaymentDay: Int?
     
-    init(loanName: LoanNames? = nil, loanType: LoanType? = nil, borrowerLentName: String, amount: Double, rateOfInterestType: RateOfInterestTypes? = nil, interestRate: Double, startDate: Date, createdAt: Date, tenure: LoanTenure? = nil, repaymentType: RePaymentType? = nil, repaymentDate: Date? = nil, instsllAmount: Double? = nil, repaymentDay: Int? = nil) {
+    init(loanName: LoanNames? = nil, loanType: LoanTypes? = nil, borrowerLentName: String, amount: Double, rateOfInterestType: RateOfInterestTypes? = nil, interestRate: Double, startDate: Date, createdAt: Date, tenure: LoanTenure? = nil, repaymentType: RePaymentType? = nil, repaymentDate: Date? = nil, installAmount: Double? = nil, repaymentDay: Int? = nil) {
         self.loanName = loanName
         self.loanType = loanType
         self.borrowerLentName = borrowerLentName
@@ -133,7 +133,7 @@ struct AddLoanModel: Identifiable, Codable {
         self.tenure = tenure
         self.repaymentType = repaymentType
         self.repaymentDate = repaymentDate
-        self.instsllAmount = instsllAmount
+        self.installAmount = installAmount
         self.repaymentDay = repaymentDay
     }
 }
